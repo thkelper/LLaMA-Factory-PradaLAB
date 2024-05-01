@@ -2,7 +2,7 @@
 model_path=/root/autodl-tmp/models/llama-8b-instruct-pro
 model_name=L8BI
 ft_name=dora
-dataset=math_10k
+dataset=commonsense_170k
 lr=9e-4
 ptbs=2
 pebs=1
@@ -12,7 +12,7 @@ project=DoRA_commonsense
 entity=prada-lab
 output_dir=/root/autodl-tmp/train_exps/${ft_name}_${model_name}_${dataset}_epoch${epoch}_lr${lr}_pbs${ptbs}_gas${gas}
 
-CUDA_VISIBLE_DEVICES=1 python src/train_bash.py \
+CUDA_VISIBLE_DEVICES=0 python src/train_bash.py \
 	    --stage sft \
 	    --do_train \
 		--model_name_or_path ${model_path} \
