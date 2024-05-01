@@ -1,0 +1,32 @@
+CUDA_VISIBLE_DEVICES=0,1 accelerate launch src/train_bash.py \
+    --stage sft \
+    --do_train \
+    --model_name_or_path /root/autodl-tmp/llama3-8B-pro/commonsense_set1 \
+    --dataset math_10k \
+    --template default \
+    --finetuning_type freeze \
+    --name_module_trainable all \
+    --num_layer_trainable 1 \
+    --use_llama_pro \
+    --output_dir ~/autodl-tmp/llama3-8B/llama-pro_math_set1 \
+    --overwrite_cache \
+    --overwrite_output_dir \
+    --cutoff_len 1024 \
+    --preprocessing_num_workers 4 \
+    --per_device_train_batch_size 1 \
+    --per_device_eval_batch_size 1 \
+    --gradient_accumulation_steps 32 \
+    --lr_scheduler_type cosine \
+    --logging_steps 10 \
+    --warmup_steps 20 \
+    --save_steps 100 \
+    --eval_steps 100 \
+    --evaluation_strategy steps \
+    --load_best_model_at_end \
+    --learning_rate 9e-4 \
+    --num_train_epochs 2 \
+    --warmup_ratio 0.1 \
+    --max_samples 3000 \
+    --val_size 0.1 \
+    --plot_loss \
+    --fp16
