@@ -12,18 +12,18 @@ class ModelArguments:
             "help": "Path to the model weight or identifier from huggingface.co/models or modelscope.cn/models."
         },
     )
-    # wand_project: str = field(
-    #     default=None,
-    #     metadata={
-    #         "help": "the project name of wandb, for example llama pro."
-    #     }
-    # )
-    # wand_entity: str = field(
-    #     default=None,
-    #     metadata={
-    #         "help": "the entity name of wandb, for example pradalab."
-    #     }
-    # )
+    wandb_project: str = field(
+        default=None,
+        metadata={
+            "help": "the project name of wandb, for example llama pro."
+        }
+    )
+    wandb_entity: str = field(
+        default=None,
+        metadata={
+            "help": "the entity name of wandb, for example pradalab."
+        }
+    )
     adapter_name_or_path: Optional[str] = field(
         default=None,
         metadata={"help": "Path to the adapter weight or identifier from huggingface.co/models."},
