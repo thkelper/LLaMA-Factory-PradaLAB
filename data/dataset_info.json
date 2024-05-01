@@ -1,6 +1,14 @@
 {
   "commonsense_170k": {
-    "file_name": "/root/autodl-tmp/data/pradalab_data/dataset/commonsense_170k/train.json",
+    "file_name": "/root/autodl-tmp/datasets/commonsense_170k/train.json",
+    "columns": {
+      "prompt": "instruction",
+      "query": "input",
+      "response": "output"
+    }
+  },
+  "math_10k": {
+    "file_name": "/root/autodl-tmp/datasets/math_10k/train.json",
     "columns": {
       "prompt": "instruction",
       "query": "input",
