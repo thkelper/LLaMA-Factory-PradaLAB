@@ -12,6 +12,8 @@ from ...model import load_model, load_tokenizer
 from ..utils import create_modelcard_and_push
 from .metric import ComputeMetrics
 from .trainer import CustomSeq2SeqTrainer
+import wandb
+from datetime import datetime
 
 
 if TYPE_CHECKING:
@@ -75,6 +77,9 @@ def run_sft(
         trainer.log_metrics("train", train_result.metrics)
         trainer.save_metrics("train", train_result.metrics)
         trainer.save_state()
+        if trainer.is_world_process_zero():
+            train_exps_name = training_args.output_dir.split("/")[-1]
+            wandb.init(name=f"{train_exps_name}_{str(datetime.now().strftime('%Y.%m.%d-%H.%M.%S'))}", project="llama pro", entity="prada-lab")
         if trainer.is_world_process_zero() and finetuning_args.plot_loss:
             plot_loss(training_args.output_dir, keys=["loss", "eval_loss"])
 
