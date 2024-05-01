@@ -1,8 +1,19 @@
+model_path=/root/autodl-tmp/models/llama-8b-instruct-pro
+model_name=L8BI
+ft_name=dora
+dataset=math_10k
+lr=5e-5
+pbs=2
+ga=16
+epoch=2.0
+project=DoRA_commonsense
+entity=prada-lab
+
 CUDA_VISIBLE_DEVICES=0 python src/train_bash.py \
 	    --stage sft \
 	    --do_train \
-		--model_name_or_path /root/autodl-tmp/models/llama-8b-instruct \
-		--dataset commonsense_170k \
+		--model_name_or_path ${model_path} \
+		--dataset ${dataset} \
 		--template default \
 		--finetuning_type lora \
 		--use_dora \

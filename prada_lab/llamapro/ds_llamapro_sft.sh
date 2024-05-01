@@ -4,11 +4,14 @@ model_name=L8BI
 ft_name=llamapro
 dataset=math_10k
 lr=5e-5
-pbs=2
-ga=16
+ptbs=2
+pebs=1
+gas=16
 epoch=2.0
 project=llama\ pro
 entity=prada-lab
+output_dir=/root/autodl-tmp/train_exps/${ft_name}_${model_name}_${dataset}_epoch${epoch}_lr${lr}_pbs${ptbs}_ga${gas}
+
 
 NCCL_P2P_DISABLE=1 NCCL_IB_DISABLE=1 deepspeed --num_gpus 1 src/train_bash.py \
     --deepspeed /root/LLaMA-Factory-PradaLAB/prada_lab/llamapro/ds_z3_config.json \
@@ -21,14 +24,14 @@ NCCL_P2P_DISABLE=1 NCCL_IB_DISABLE=1 deepspeed --num_gpus 1 src/train_bash.py \
     --name_module_trainable all \
     --num_layer_trainable 4 \
     --use_llama_pro \
-    --output_dir /root/autodl-tmp/train_exps/${ft_name}_${model_name}_${dataset}_epoch${epoch}_lr${lr}_pbs${pbs}_ga${ga} \
+    --output_dir ${output_dir} \
     --overwrite_cache \
     --overwrite_output_dir \
     --cutoff_len 1024 \
     --preprocessing_num_workers 16 \
-    --per_device_train_batch_size ${pbs} \
-    --per_device_eval_batch_size 1 \
-    --gradient_accumulation_steps ${ga} \
+    --per_device_train_batch_size ${ptbs} \
+    --per_device_eval_batch_size ${pebs}1 \
+    --gradient_accumulation_steps ${gas} \
     --lr_scheduler_type cosine \
     --logging_steps 10 \
     --warmup_steps 20 \
