@@ -45,5 +45,5 @@ NCCL_P2P_DISABLE=1 NCCL_IB_DISABLE=1 deepspeed --num_gpus 1 src/train_bash.py \
     --val_size 0.1 \
     --plot_loss \
     --fp16 \
-    # --wandb_project ${project} \
-    # --wandb_entity ${entity}
+    --wandb_project ${project} \
+    --wandb_entity ${entity}

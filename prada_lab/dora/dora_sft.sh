@@ -1,13 +1,16 @@
+#!/bin/bash
 model_path=/root/autodl-tmp/models/llama-8b-instruct-pro
 model_name=L8BI
 ft_name=dora
 dataset=math_10k
-lr=5e-5
-pbs=2
-ga=16
+lr=9e-4
+ptbs=2
+pebs=1
+gas=16
 epoch=2.0
 project=DoRA_commonsense
 entity=prada-lab
+output_dir=/root/autodl-tmp/train_exps/${ft_name}_${model_name}_${dataset}_epoch${epoch}_lr${lr}_pbs${ptbs}_ga${gas}
 
 CUDA_VISIBLE_DEVICES=0 python src/train_bash.py \
 	    --stage sft \
@@ -18,7 +21,7 @@ CUDA_VISIBLE_DEVICES=0 python src/train_bash.py \
 		--finetuning_type lora \
 		--use_dora \
 		--lora_target q_proj,v_proj \
-		--output_dir /root/autodl-tmp/train_exps/dora_llama-8b-instruct_commonsense_lr9e-4_pbs2_ga16 \
+		--output_dir ${output_dir} \
 		--overwrite_cache \
 		--per_device_train_batch_size 2 \
 		--gradient_accumulation_steps 16 \
@@ -29,5 +32,7 @@ CUDA_VISIBLE_DEVICES=0 python src/train_bash.py \
 		--warmup_ratio 0.1 \
 		--plot_loss \
 		--fp16 \
-		--report_to wandb
+		--report_to wandb \
+		--wandb_project ${project} \
+		--wandb_entity ${entity}
 		# --overwrite_output_dir \
