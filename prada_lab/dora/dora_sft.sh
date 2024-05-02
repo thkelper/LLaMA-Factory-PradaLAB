@@ -1,5 +1,5 @@
 #!/bin/bash
-model_path=/root/autodl-tmp/models/llama-8b-instruct-pro
+model_path=/root/autodl-tmp/data/models/llama-8b-instruct
 model_name=L8BI
 ft_name=dora
 dataset=math_10k

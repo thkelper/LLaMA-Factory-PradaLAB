@@ -2,19 +2,20 @@ CUDA_VISIBLE_DEVICES=0 python src/train_bash.py \
 	    --stage sft \
 	    --do_train \
 		--model_name_or_path /root/autodl-tmp/data/models/llama-8b-instruct \
-		--dataset commonsense_170k \
+		--dataset math_10k \
 		--template default \
 		--finetuning_type lora \
 		--use_dora \
 		--lora_target q_proj,v_proj \
-		--output_dir /root/autodl-tmp/data/models/llama3-8B-instruct/dora_commonsense_set1 \
+		--output_dir /root/autodl-tmp/data/models/llama3-8B-instruct/dora_math10k \
 		--overwrite_cache \
+		--overwrite_output_dir \
 		--per_device_train_batch_size 2 \
 		--gradient_accumulation_steps 16 \
 		--lr_scheduler_type cosine \
 		--logging_steps 10 \
 		--learning_rate 9e-4 \
-		--num_train_epochs 6 \
+		--num_train_epochs 2 \
 		--warmup_ratio 0.1 \
 		--plot_loss \
 		--fp16 \
