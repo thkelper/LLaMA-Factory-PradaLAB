@@ -1,14 +1,14 @@
 #!/bin/bash
 model_path=/root/autodl-tmp/models/llama-8b-instruct
 model_name=L8BI
-ft_name=dora
+ft_name=dora_max1k
 # dataset=commonsense_170k
-dataset=math_10k
+dataset=code_80k
 lr=9e-4
 ptbs=2
 pebs=1
 gas=16
-epoch=3.0
+epoch=2.0
 project=DoRA_commonsense
 entity=prada-lab
 output_dir=/root/autodl-tmp/train_exps/${ft_name}_${model_name}_${dataset}_epoch${epoch}_lr${lr}_pbs${ptbs}_gas${gas}
@@ -35,5 +35,6 @@ CUDA_VISIBLE_DEVICES=0 python src/train_bash.py \
 		--fp16 \
 		--report_to wandb \
 		--wandb_project ${project} \
-		--wandb_entity ${entity}
+		--wandb_entity ${entity} \
+		--max_samples 1000
 		# --overwrite_output_dir \
