@@ -1,7 +1,8 @@
 """
 python eval.py --task commonsense \
 --ckpt_dir /root/autodl-tmp/fine-tuned_models/dora_C_set1 \
---base_model_path /root/autodl-tmp/llama3-8B
+--base_model_path /root/autodl-tmp/llama3-8B \
+--method dora
 """
 
 
@@ -81,17 +82,30 @@ def extract_output(pred, trigger=''):
 
 
 
-def main(ckpt_dir, base_model_path, task):
-    model = AutoModelForCausalLM.from_pretrained(
-        base_model_path,
-        torch_dtype=torch.float16,
-    )
-    model.generation_config.temperature=None
-    model.generation_config.top_p=None
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    tokenizer = AutoTokenizer.from_pretrained(ckpt_dir, padding_side = "left")
-    model = PeftModel.from_pretrained(model, ckpt_dir)
-    model = model.to(device)
+def main(ckpt_dir, base_model_path, task, method):
+    
+    if method == 'pro':
+        model = AutoModelForCausalLM.from_pretrained(
+            ckpt_dir,
+            torch_dtype=torch.float16,
+        )
+        model.generation_config.temperature=None
+        model.generation_config.top_p=None
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        tokenizer = AutoTokenizer.from_pretrained(ckpt_dir, padding_side = "left")
+        model = model.to(device)
+        
+    elif method == 'dora':    
+        model = AutoModelForCausalLM.from_pretrained(
+            base_model_path,
+            torch_dtype=torch.float16,
+        )
+        model.generation_config.temperature=None
+        model.generation_config.top_p=None
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        tokenizer = AutoTokenizer.from_pretrained(ckpt_dir, padding_side = "left")
+        model = PeftModel.from_pretrained(model, ckpt_dir)
+        model = model.to(device)
     
     if task == 'commonsense':
         dataset_names = ["boolq", "piqa", "social_i_qa", "hellaswag", "winogrande", "ARC-Easy", "ARC-Challenge", "openbookqa"]
