@@ -29,7 +29,7 @@ class Evaluator:
         self.choice_inputs = [
             self.tokenizer.encode(self.eval_template.prefix + ch, add_special_tokens=False)[-1] for ch in CHOICES
         ]
-
+    
     @torch.inference_mode()
     def batch_inference(self, batch_input: Dict[str, torch.Tensor]) -> List[str]:
         logits = self.model(**batch_input).logits
