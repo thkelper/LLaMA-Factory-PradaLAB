@@ -1,5 +1,5 @@
 # clone the LLM-Adapters repository (we forked the version we used)
-git clone --depth=1 https://github.com/aryamanarora/LLM-Adapters.git /root/autodl-tmp/LLM-Adapters
+git clone --depth=1 https://mirror.ghproxy.com/github.com/aryamanarora/LLM-Adapters.git /root/autodl-tmp/LLM-Adapters
 # clone our own repository for holding ultrafeedback datasets
 # git clone --depth=1 https://github.com/frankaging/ultrafeedback-datasets.git /root/autodl-tmp/ultrafeedback-datasets
 
