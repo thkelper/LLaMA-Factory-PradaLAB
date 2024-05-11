@@ -45,7 +45,7 @@ class Evaluator:
             cache_dir=self.model_args.cache_dir,
             token=self.model_args.hf_hub_token,
         )
-
+        
         with open(mapping, "r", encoding="utf-8") as f:
             categorys: Dict[str, Dict[str, str]] = json.load(f)
 

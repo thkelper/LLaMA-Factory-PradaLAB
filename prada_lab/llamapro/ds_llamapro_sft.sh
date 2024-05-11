@@ -31,7 +31,6 @@ NCCL_P2P_DISABLE=1 NCCL_IB_DISABLE=1 deepspeed --num_gpus 2 src/train_bash.py \
     --per_device_train_batch_size ${ptbs} \
     --per_device_eval_batch_size ${pebs}1 \
     --gradient_accumulation_steps ${gas} \
-    --overwrite_output_dir \
     --lr_scheduler_type cosine \
     --logging_steps 100 \
     --warmup_steps 20 \
@@ -45,6 +44,7 @@ NCCL_P2P_DISABLE=1 NCCL_IB_DISABLE=1 deepspeed --num_gpus 2 src/train_bash.py \
     --wandb_entity ${entity} \
     --save_steps 1000 \
     --evaluation_strategy steps \
+    # --overwrite_output_dir \
     # --max_samples 1000
     # --eval_steps 100 \
     
