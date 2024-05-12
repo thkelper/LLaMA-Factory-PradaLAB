@@ -34,7 +34,7 @@ def run_sft(
     tokenizer = tokenizer_module["tokenizer"]
     dataset = get_dataset(model_args, data_args, training_args, stage="sft", **tokenizer_module)
     model = load_model(tokenizer, model_args, finetuning_args, training_args.do_train)
-
+    
     if training_args.predict_with_generate:
         tokenizer.padding_side = "left"  # use left-padding in generation
 

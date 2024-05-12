@@ -42,7 +42,7 @@ NCCL_P2P_DISABLE=1 NCCL_IB_DISABLE=1 deepspeed --num_gpus 2 src/train_bash.py \
     --fp16 \
     --wandb_project ${project} \
     --wandb_entity ${entity} \
-    --save_steps 1000 \
+    --save_steps 3000 \
     --evaluation_strategy steps \
     # --overwrite_output_dir \
     # --max_samples 1000
