@@ -106,7 +106,7 @@ def main(ckpt_dir, task, method, base_model_path=None, debug=False):
         trigger_token = "the correct answer is "
     elif task == 'math':
         dataset_names = ["MultiArith", "gsm8k", "SVAMP", "mawps", "AddSub", "AQuA", "SingleEq"]
-        dataset_names = ['MultiArith']
+        # dataset_names = ['MultiArith']
         trigger_token = "The answer is "
         # answer_template = "Response Format is {The answer is {your answer}}."
     else:
@@ -145,6 +145,8 @@ def main(ckpt_dir, task, method, base_model_path=None, debug=False):
             # Prepare batch inputs
             #  instruction = "Question: " + batch["instruction"][0] + "the correct answer is "
             # instruction = batch["instruction"][0] + ". the correct answer is "
+            import pdb
+            pdb.set_trace()
             instruction, output, answer = batch['instruction'][0], batch['output'][0], batch['answer'][0]
             # import pdb
             # pdb.set_trace()
@@ -153,9 +155,11 @@ def main(ckpt_dir, task, method, base_model_path=None, debug=False):
             # instruction = instruction + "," + question
             # instruction = instruction + ',' + trigger_token
             # instruction = instruction + ',' + answer_template
+
             inputs = tokenizer(instruction, padding=True, truncation=True, return_tensors="pt")
             inputs = {k: v.to(device) for k, v in inputs.items()}
             inputs_ids = inputs['input_ids']
+
             
             with torch.no_grad():
                 outputs = model.generate(inputs_ids, max_length=512, pad_token_id=tokenizer.eos_token_id, do_sample=False)
@@ -169,7 +173,10 @@ def main(ckpt_dir, task, method, base_model_path=None, debug=False):
                 # raw_generation = extract_output(pred, trigger_token)
                 answer = batch["answer"][idx].strip()
                 if task == "commonsense":
-                    generation = raw_generation[:]
+                    # generation = raw_generation[:]
+                    raw_generation = regex.split(r'\n+', pred)[-1]
+                    # import pdb
+                    # pdb.set_trace()
                     if generation.strip() == answer.strip():
                         correct_count += 1
                 elif task == "math":
