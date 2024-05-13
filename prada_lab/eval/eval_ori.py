@@ -1,12 +1,19 @@
 """
+Dora:
 python eval.py --task commonsense \
 --ckpt_dir /root/autodl-tmp/fine-tuned_models/dora_C_set1 \
 --base_model_path /root/autodl-tmp/llama3-8B \
 --method dora
+
+Pro:
+python eval.py --task commonsense \
+--ckpt_dir /root/autodl-tmp/fine-tuned_models/pro_C_set1 \
+--base_model_path None \
+--method pro
 """
 
 
-
+import os
 from datasets import load_dataset, concatenate_datasets, DatasetDict
 from torch.utils.data import DataLoader
 import torch
@@ -16,6 +23,7 @@ from peft import PeftModel
 from tqdm import tqdm
 import re
 import json
+import csv
 
 
 def is_float(element: any) -> bool:
@@ -89,23 +97,19 @@ def main(ckpt_dir, base_model_path, task, method):
             ckpt_dir,
             torch_dtype=torch.float16,
         )
-        model.generation_config.temperature=None
-        model.generation_config.top_p=None
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        tokenizer = AutoTokenizer.from_pretrained(ckpt_dir, padding_side = "left")
-        model = model.to(device)
         
     elif method == 'dora':    
         model = AutoModelForCausalLM.from_pretrained(
             base_model_path,
             torch_dtype=torch.float16,
         )
-        model.generation_config.temperature=None
-        model.generation_config.top_p=None
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        tokenizer = AutoTokenizer.from_pretrained(ckpt_dir, padding_side = "left")
         model = PeftModel.from_pretrained(model, ckpt_dir)
-        model = model.to(device)
+    model.generation_config.temperature=None
+    model.generation_config.top_p=None
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    tokenizer = AutoTokenizer.from_pretrained(ckpt_dir, padding_side = "left", model_max_length=512)
+    
+    model = model.to(device)
     
     if task == 'commonsense':
         dataset_names = ["boolq", "piqa", "social_i_qa", "hellaswag", "winogrande", "ARC-Easy", "ARC-Challenge", "openbookqa"]
@@ -116,18 +120,25 @@ def main(ckpt_dir, base_model_path, task, method):
     else:
         raise ValueError("Invalid task provided. Please enter either 'commonsense' or 'math'.")
     
+    
     for name in dataset_names:
         # Load dataset
         data_file = f'/root/autodl-tmp/dataset/{name}/test.json'
+        output_file = f'/root/autodl-tmp/evaluation/results/{name}.json'
         dataset = load_dataset('json', data_files={'train': data_file}, split='train')
         loader = DataLoader(dataset, batch_size=1, shuffle=False)
         correct_count = 0
         total_count = 0
-
+        results = []
+        scores = {}
         for batch in tqdm(loader, desc=f"Processing {name}"):
             # Prepare batch inputs
             #  instruction = "Question: " + batch["instruction"][0] + "the correct answer is "
             instruction = batch["instruction"][0] + ". the correct answer is "
+            instruction, output, answer = batch['instruction'][0], batch['output'][0], batch['answer'][0]
+            
+            question = output.replace(answer, "")
+            instruction = instruction + "," + question
             inputs = tokenizer(instruction, padding=True, truncation=True, return_tensors="pt")
             inputs = {k: v.to(device) for k, v in inputs.items()}
             inputs_ids = inputs['input_ids']
@@ -136,13 +147,14 @@ def main(ckpt_dir, base_model_path, task, method):
                 outputs = model.generate(inputs_ids, max_length=512, pad_token_id=tokenizer.eos_token_id, do_sample=False)
 
             actual_preds = tokenizer.batch_decode(outputs, skip_special_tokens=True)
-            import pdb
-            pdb.set_trace()
+            
             # Evaluate predictions
             for idx, pred in enumerate(actual_preds):
                 
                 raw_generation = extract_output(pred, trigger_token)
                 answer = batch["answer"][idx].strip()
+                import pdb
+                pdb.set_trace()
                 if task == "commonsense":
                     generation = raw_generation[:]
                     if generation.strip() == answer.strip():
@@ -156,10 +168,22 @@ def main(ckpt_dir, base_model_path, task, method):
                         generation = extract_answer_number(raw_generation)
                         if abs(float(answer) - generation) <= 0.001:
                             correct_count += 1
+                results.append({"question": instruction, "generated_answer": generation.strip(), "actual_answer": answer.strip()})
+                with open(output_file, 'w') as f:
+                    json.dump(results, f, indent=4)
                 total_count += 1
 
-        # Print evaluation result for the current dataset
-        print(f"Accuracy for {name}: {correct_count / total_count:.3f}")
+        
+        score = f"{name}, {correct_count / total_count:.3f}"
+        print(score)
+        scores[name] = score
+    with open('f/root/autodl-tmp/evaluation/results/{method}_{task}_score.csv', mode='w', newline='', encoding='utf-8') as file:
+        fields = ['dataset', 'score']
+        writer = csv.DictWriter(file, fieldnames=fields)
+        writer.writeheader()
+        for name in dataset_names:
+            writer.writerow({'dataset': name, 'score': scores[name]})
+
 
 
     

@@ -2,8 +2,8 @@ output_dir=/root/autodl-tmp/train_exps/llamapro_L8BI_math_10k_epoch2.0_lr9e-4_pb
 export_dir=/root/autodl-tmp/export_exps/llamapro_L8BI_math_10k_epoch2.0_lr9e-4_pbs2_ga16
 
 python3 src/export_model.py \
-    --model_name_or_path ${output_dir} \
+    --model_name_or_path ${output_dir} \ # fine-tuned model path
     --template llama3 \
-    --export_dir ${export_dir} \
+    --export_dir ${export_dir} \ # huggingface model path
     --finetuning_type freeze
     # --adapter_name_or_path ${output_dir} \
