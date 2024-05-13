@@ -112,11 +112,13 @@ def main(ckpt_dir, base_model_path, task, method):
     model = model.to(device)
     
     if task == 'commonsense':
+        max_new_tokens = 32
         dataset_names = ["boolq", "piqa", "social_i_qa", "hellaswag", "winogrande", "ARC-Easy", "ARC-Challenge", "openbookqa"]
         trigger_token = "the correct answer is "
     elif task == 'math':
+        max_new_tokens = 512
         dataset_names = ["MultiArith", "gsm8k", "SVAMP", "mawps", "AddSub", "AQuA", "SingleEq"]
-        trigger_token = "The answer is "
+        trigger_token = "Assistant:"
     else:
         raise ValueError("Invalid task provided. Please enter either 'commonsense' or 'math'.")
     
@@ -146,11 +148,11 @@ def main(ckpt_dir, base_model_path, task, method):
             inputs = tokenizer(instruction, padding=True, truncation=True, return_tensors="pt")
             inputs = {k: v.to(device) for k, v in inputs.items()}
             inputs_ids = inputs['input_ids']
-            
+                
             with torch.no_grad():
                 outputs = model.generate(
                     inputs_ids, 
-                    max_new_tokens=32, 
+                    max_new_tokens=max_new_tokens, 
                     pad_token_id=tokenizer.eos_token_id, 
                     do_sample=False,
                 )
@@ -162,9 +164,9 @@ def main(ckpt_dir, base_model_path, task, method):
             # Evaluate predictions
             for idx, pred in enumerate(actual_preds):
                 raw_generation = extract_output(pred, trigger_token)
-                # print(pred)
-                # print(raw_generation)
-                # input()
+                # import pdb
+                # pdb.set_trace()
+                
                 answer = batch["answer"][idx].strip()
                 if task == "commonsense":
                     generation = raw_generation[:]
@@ -197,7 +199,6 @@ def main(ckpt_dir, base_model_path, task, method):
 
 
 
-    
         
 
 if __name__ == "__main__":
