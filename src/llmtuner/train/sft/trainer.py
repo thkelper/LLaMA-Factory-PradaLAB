@@ -102,7 +102,7 @@ class CustomSeq2SeqTrainer(Seq2SeqTrainer):
         preds = np.where(
             predict_results.predictions != IGNORE_INDEX, predict_results.predictions, self.tokenizer.pad_token_id
         )
-
+        
         for i in range(len(preds)):
             pad_len = np.nonzero(preds[i] != self.tokenizer.pad_token_id)[0]
             if len(pad_len):

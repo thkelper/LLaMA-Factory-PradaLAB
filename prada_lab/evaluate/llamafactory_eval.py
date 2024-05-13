@@ -8,6 +8,8 @@ from tqdm import tqdm
 import re
 import json
 import os.path as osp
+import regex
+
 
 def is_float(element: any) -> bool:
     #If you expect None to be passed:
@@ -18,7 +20,8 @@ def is_float(element: any) -> bool:
         return True
     except ValueError:
         return False
-        
+    
+
 def extract_answer_number(sentence: str) -> float:
     """
     To ensure a fair comparison, we follow:
@@ -59,19 +62,22 @@ def extract_answer_letter(sentence: str) -> str:
         return ''
         
         
-def extract_output(pred, trigger=''):
-    if not trigger:
-        return pred
-    # for causallm only, use special trigger to detect new tokens.
-    # if cannot find trigger --> generation is too long; default to empty generation
-    start = pred.find(trigger)
-    if start < 0:
-        return ''
-    output = pred[start+len(trigger):].lstrip() # left strip any whitespaces
-    return output
+# def extract_output(pred, trigger=''):
+#     if not trigger:
+#         return pred
+#     # for causallm only, use special trigger to detect new tokens.
+#     # if cannot find trigger --> generation is too long; default to empty generation
+#     start = pred.find(trigger)
+#     if start < 0:
+#         return 
+#     output = pred[start+len(trigger):].lstrip() # left strip any whitespaces
+#     return output
+
+# def extract_output(pred):
+
     
 
-def main(ckpt_dir, task, method, base_model_path=None):
+def main(ckpt_dir, task, method, base_model_path=None, debug=False):
     if method == 'pro':
         model = AutoModelForCausalLM.from_pretrained(
             ckpt_dir,
@@ -100,32 +106,60 @@ def main(ckpt_dir, task, method, base_model_path=None):
         trigger_token = "the correct answer is "
     elif task == 'math':
         dataset_names = ["MultiArith", "gsm8k", "SVAMP", "mawps", "AddSub", "AQuA", "SingleEq"]
+        # dataset_names = ['MultiArith']
         trigger_token = "The answer is "
+        # answer_template = "Response Format is {The answer is {your answer}}."
     else:
         raise ValueError("Invalid task provided. Please enter either 'commonsense' or 'math'.")
     
     for name in dataset_names:
         # Load dataset
+        
         data_root = '/root/autodl-tmp/datasets'
         # data_file = f'data_root/{name}/test.json'
-        data_file = osp.join(data_root, name, 'test.json')
-        dataset = load_dataset('json', data_files={'train': data_file}, split='train')
+        data_path = osp.join(data_root, name, 'test.json')
+        if debug:
+            data_fname = osp.basename(data_path)
+            ftitle, fext = osp.splitext(data_fname)
+            new_data_fname = f'{name}_test_size{fext}'
+            new_data_path = osp.join(data_root, name, new_data_fname)
+            with open(data_path, 'r') as fp:
+                data_list = json.load(fp)
+                
+                # test_size = int( * sample)
+                test_size = min(len(data_list), 100)
+                test_data_list = data_list[:test_size]
+            with open(new_data_path, 'w') as fp:
+                json.dump(test_data_list, fp)
+            dataset = load_dataset('json', data_files={'train': new_data_path}, split='train')
+        else:
+            dataset = load_dataset('json', data_files={'train': data_path}, split='train')
+
         loader = DataLoader(dataset, batch_size=1, shuffle=False)
         correct_count = 0
         total_count = 0
+        if debug:
+            debug_result = list()
 
         for batch in tqdm(loader, desc=f"Processing {name}"):
             # Prepare batch inputs
             #  instruction = "Question: " + batch["instruction"][0] + "the correct answer is "
             # instruction = batch["instruction"][0] + ". the correct answer is "
+            import pdb
+            pdb.set_trace()
             instruction, output, answer = batch['instruction'][0], batch['output'][0], batch['answer'][0]
             # import pdb
             # pdb.set_trace()
-            question = output.replace(answer, "")
-            instruction = instruction + "," + question
+            # if answer in output
+            # question = output.replace(answer, "")
+            # instruction = instruction + "," + question
+            # instruction = instruction + ',' + trigger_token
+            # instruction = instruction + ',' + answer_template
+
             inputs = tokenizer(instruction, padding=True, truncation=True, return_tensors="pt")
             inputs = {k: v.to(device) for k, v in inputs.items()}
             inputs_ids = inputs['input_ids']
+
             
             with torch.no_grad():
                 outputs = model.generate(inputs_ids, max_length=512, pad_token_id=tokenizer.eos_token_id, do_sample=False)
@@ -136,13 +170,18 @@ def main(ckpt_dir, task, method, base_model_path=None):
             # Evaluate predictions
             for idx, pred in enumerate(actual_preds):
                 
-                raw_generation = extract_output(pred, trigger_token)
+                # raw_generation = extract_output(pred, trigger_token)
                 answer = batch["answer"][idx].strip()
                 if task == "commonsense":
-                    generation = raw_generation[:]
+                    # generation = raw_generation[:]
+                    raw_generation = regex.split(r'\n+', pred)[-1]
+                    # import pdb
+                    # pdb.set_trace()
                     if generation.strip() == answer.strip():
                         correct_count += 1
                 elif task == "math":
+                    # answer = eval(answer)
+                    raw_generation = regex.split(r'\n+', pred)[-1]
                     if not is_float(answer): # assuming this is from AQuA:
                         generation = extract_answer_letter(raw_generation)
                         if generation.strip() == answer.strip():
@@ -152,6 +191,18 @@ def main(ckpt_dir, task, method, base_model_path=None):
                         if abs(float(answer) - generation) <= 0.001:
                             correct_count += 1
                 total_count += 1
+                if debug:
+                    debug_result.append(dict(instruction=instruction, answer=answer, pred=actual_preds, pred_answer=generation))
+                    
+        
+        accuracy = f'{correct_count / total_count:.3f}'
+        if debug:
+            new_debug_fname = f'{name}_debug_{accuracy}{fext}'
+            new_debug_path = osp.join(data_root, name, new_debug_fname)
+            with open(new_debug_path, "w") as fp:
+                json.dump(debug_result, fp, indent=2)
+        
+                
 
         # Print evaluation result for the current dataset
         print(f"Accuracy for {name}: {correct_count / total_count:.3f}")
