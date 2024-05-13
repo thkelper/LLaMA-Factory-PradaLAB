@@ -107,7 +107,7 @@ def main(ckpt_dir, base_model_path, task, method):
     model.generation_config.temperature=None
     model.generation_config.top_p=None
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    tokenizer = AutoTokenizer.from_pretrained(ckpt_dir, padding_side = "left", model_max_length=512)
+    tokenizer = AutoTokenizer.from_pretrained(ckpt_dir)
     
     model = model.to(device)
     
@@ -124,7 +124,9 @@ def main(ckpt_dir, base_model_path, task, method):
     for name in dataset_names:
         # Load dataset
         data_file = f'/root/autodl-tmp/dataset/{name}/test.json'
-        output_file = f'/root/autodl-tmp/evaluation/results/{name}.json'
+        output_file = f'/root/autodl-tmp/evaluation/results/{method}_{task}/{name}.json'
+        if not os.path.exists(os.path.dirname(output_file)):
+            os.makedirs(os.path.dirname(output_file))
         dataset = load_dataset('json', data_files={'train': data_file}, split='train')
         loader = DataLoader(dataset, batch_size=1, shuffle=False)
         correct_count = 0
@@ -134,27 +136,36 @@ def main(ckpt_dir, base_model_path, task, method):
         for batch in tqdm(loader, desc=f"Processing {name}"):
             # Prepare batch inputs
             #  instruction = "Question: " + batch["instruction"][0] + "the correct answer is "
-            instruction = batch["instruction"][0] + ". the correct answer is "
+            # instruction = batch["instruction"][0] + ". the correct answer is "
             instruction, output, answer = batch['instruction'][0], batch['output'][0], batch['answer'][0]
             
-            question = output.replace(answer, "")
-            instruction = instruction + "," + question
+            # question = output.replace(answer, "")
+            # instruction = instruction + "," + question
+            instruction = f"Human: {instruction.strip()}\nAssistant: "
+
             inputs = tokenizer(instruction, padding=True, truncation=True, return_tensors="pt")
             inputs = {k: v.to(device) for k, v in inputs.items()}
             inputs_ids = inputs['input_ids']
             
             with torch.no_grad():
-                outputs = model.generate(inputs_ids, max_length=512, pad_token_id=tokenizer.eos_token_id, do_sample=False)
+                outputs = model.generate(
+                    inputs_ids, 
+                    max_new_tokens=32, 
+                    pad_token_id=tokenizer.eos_token_id, 
+                    do_sample=False,
+                )
 
             actual_preds = tokenizer.batch_decode(outputs, skip_special_tokens=True)
+            # print(actual_preds)
+            # print('--=-=-=')
             
             # Evaluate predictions
             for idx, pred in enumerate(actual_preds):
-                
                 raw_generation = extract_output(pred, trigger_token)
+                # print(pred)
+                # print(raw_generation)
+                # input()
                 answer = batch["answer"][idx].strip()
-                import pdb
-                pdb.set_trace()
                 if task == "commonsense":
                     generation = raw_generation[:]
                     if generation.strip() == answer.strip():
@@ -168,7 +179,7 @@ def main(ckpt_dir, base_model_path, task, method):
                         generation = extract_answer_number(raw_generation)
                         if abs(float(answer) - generation) <= 0.001:
                             correct_count += 1
-                results.append({"question": instruction, "generated_answer": generation.strip(), "actual_answer": answer.strip()})
+                results.append({"question": instruction, "generated_answer": generation, "actual_answer": answer})
                 with open(output_file, 'w') as f:
                     json.dump(results, f, indent=4)
                 total_count += 1
@@ -177,7 +188,7 @@ def main(ckpt_dir, base_model_path, task, method):
         score = f"{name}, {correct_count / total_count:.3f}"
         print(score)
         scores[name] = score
-    with open('f/root/autodl-tmp/evaluation/results/{method}_{task}_score.csv', mode='w', newline='', encoding='utf-8') as file:
+    with open(f'/root/autodl-tmp/evaluation/results/{method}_{task}_score.csv', mode='w', newline='', encoding='utf-8') as file:
         fields = ['dataset', 'score']
         writer = csv.DictWriter(file, fieldnames=fields)
         writer.writeheader()
