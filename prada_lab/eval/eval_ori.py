@@ -107,7 +107,7 @@ def main(ckpt_dir, base_model_path, task, method):
     model.generation_config.temperature=None
     model.generation_config.top_p=None
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    tokenizer = AutoTokenizer.from_pretrained(ckpt_dir)
+    tokenizer = AutoTokenizer.from_pretrained(ckpt_dir, padding_side='left')
     
     model = model.to(device)
     
@@ -130,22 +130,17 @@ def main(ckpt_dir, base_model_path, task, method):
         if not os.path.exists(os.path.dirname(output_file)):
             os.makedirs(os.path.dirname(output_file))
         dataset = load_dataset('json', data_files={'train': data_file}, split='train')
-        loader = DataLoader(dataset, batch_size=1, shuffle=False)
+        loader = DataLoader(dataset, batch_size=32, shuffle=False)
         correct_count = 0
         total_count = 0
         results = []
         scores = {}
         for batch in tqdm(loader, desc=f"Processing {name}"):
-            # Prepare batch inputs
-            #  instruction = "Question: " + batch["instruction"][0] + "the correct answer is "
-            # instruction = batch["instruction"][0] + ". the correct answer is "
-            instruction, output, answer = batch['instruction'][0], batch['output'][0], batch['answer'][0]
-            
-            # question = output.replace(answer, "")
-            # instruction = instruction + "," + question
-            instruction = f"Human: {instruction.strip()}\nAssistant: "
+            # Prepare batch inputs            
+            instructions = [f"Human: {ins.strip()}\nAssistant: " for ins in batch['instruction']]
 
-            inputs = tokenizer(instruction, padding=True, truncation=True, return_tensors="pt")
+
+            inputs = tokenizer(instructions, padding=True, truncation=True, return_tensors="pt")
             inputs = {k: v.to(device) for k, v in inputs.items()}
             inputs_ids = inputs['input_ids']
                 
@@ -181,7 +176,7 @@ def main(ckpt_dir, base_model_path, task, method):
                         generation = extract_answer_number(raw_generation)
                         if abs(float(answer) - generation) <= 0.001:
                             correct_count += 1
-                results.append({"question": instruction, "generated_answer": generation, "actual_answer": answer})
+                results.append({"question": instructions[idx], "generated_answer": generation, "actual_answer": answer})
                 with open(output_file, 'w') as f:
                     json.dump(results, f, indent=4)
                 total_count += 1
