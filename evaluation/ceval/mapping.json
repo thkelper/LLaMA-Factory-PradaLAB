@@ -1,4 +1,16 @@
 {
+  "dianli_routing_inspection_v1": {
+    "name": "电力巡检",
+    "category": "Electric Industry v1"
+  },
+  "dianli_routing_inspection_v2": {
+    "name": "电力巡检",
+    "category": "Electric Industry v2"
+  },
+  "dianli_routing_inspection_v1andv2": {
+        "name": "电力巡检",
+        "category": "Electric Industry v1andv2"
+  },
   "accountant": {
     "name": "注册会计师",
     "category": "Other"

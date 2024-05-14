@@ -34,7 +34,7 @@ MOD_SUPPORTED_MODELS = ["bloom", "falcon", "gemma", "llama", "mistral", "mixtral
 
 PEFT_METHODS = ["lora"]
 
-SUBJECTS = ["Average", "STEM", "Social Sciences", "Humanities", "Other"]
+SUBJECTS = ["Average", "STEM", "Social Sciences", "Humanities", "Other", "Electric Industry v1", "Electric Industry v2", "Electric Industry v1andv2"]
 
 SUPPORTED_MODELS = OrderedDict()
 
