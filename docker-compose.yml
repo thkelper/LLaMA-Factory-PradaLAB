@@ -5,9 +5,9 @@ services:
     build:
       dockerfile: Dockerfile
       context: .
-    container_name: llama_factory
+    container_name: llama_factory_latest
     volumes:
-      - ./hf_cache:/root/.cache/huggingface/
+      - ./hf_cache:/root/.cache/huggingace/
       - ./data:/app/data
       - ./output:/app/output
     environment:
