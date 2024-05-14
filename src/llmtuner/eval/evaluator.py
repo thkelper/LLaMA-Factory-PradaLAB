@@ -1,5 +1,8 @@
 # Inspired by: https://github.com/hendrycks/test/blob/master/evaluate_flan.py
 
+import datasets
+datasets.builder.has_sufficient_disk_space = lambda needed_bytes, directory='.': True
+
 import inspect
 import json
 import os
