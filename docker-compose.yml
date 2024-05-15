@@ -7,9 +7,9 @@ services:
       context: .
     container_name: llama_factory_latest
     volumes:
-      - ./hf_cache:/root/.cache/huggingace/
-      - ./data:/app/data
-      - ./output:/app/output
+      - ~/.cache/huggingface:/root/.cache/huggingface/
+      - /mnt/data:/app/data
+      - /home/yangchangpeng/LLaMA-Factory-PradaLAB:/app/LLaMA-Factory-PradaLAB
     environment:
       - CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
     ports:
