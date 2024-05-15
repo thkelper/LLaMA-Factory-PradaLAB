@@ -1,5 +1,4 @@
 #!/bin/bash
-
 method=Q8L # Quantization 8 Bit Lora
 model=Qw14BC # Qwen 14B Chat
 dataset=dianli_finetune_data_merge_1224_0425
@@ -47,8 +46,20 @@ NCCL_P2P_DISABLE=1 NCCL_IB_DISABLE=1 deepspeed --include localhost:0,1,2,3 src/t
    --learning_rate ${lr} \
    --num_train_epochs ${epochs} \
    
+
 if [$? != 0]; then
     exit 1
+else
+    # to ensure the reproducibility, copy finetune scripts to outputdir
+    self_path=$0
+    cp_self_to="$output_dir/$(basename $self_path)"
+    cp ${self_path} ${cp_self_to}
+    if [[ -f "$cp_self_to" ]]; then
+        echo "Finetune Script copied successfully to $cp_self_to"
+    else
+        echo "Failed to copy the script."
+        exit 1
+    fi
 fi
 
 python3 src/export_model.py \

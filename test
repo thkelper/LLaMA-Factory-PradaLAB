@@ -1,0 +1,5 @@
+self_path=$0
+# cp ${self_path} ${output_dir}
+echo ${self_path}
+output_dir=test
+cp ${self_path} ${output_dir}
