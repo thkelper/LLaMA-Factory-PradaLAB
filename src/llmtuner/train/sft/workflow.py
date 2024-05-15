@@ -12,6 +12,8 @@ from ...model import load_model, load_tokenizer
 from ..utils import create_modelcard_and_push
 from .metric import ComputeMetrics
 from .trainer import CustomSeq2SeqTrainer
+import wandb
+from datetime import datetime
 
 
 if TYPE_CHECKING:
@@ -32,7 +34,7 @@ def run_sft(
     tokenizer = tokenizer_module["tokenizer"]
     dataset = get_dataset(model_args, data_args, training_args, stage="sft", **tokenizer_module)
     model = load_model(tokenizer, model_args, finetuning_args, training_args.do_train)
-
+    
     if training_args.predict_with_generate:
         tokenizer.padding_side = "left"  # use left-padding in generation
 
@@ -70,11 +72,18 @@ def run_sft(
 
     # Training
     if training_args.do_train:
+        # import pdb
+        # pdb.set_trace()
+        if trainer.is_world_process_zero():
+            train_exps_name = training_args.output_dir.split("/")[-1]
+            wandb.init(name=f"{train_exps_name}_{str(datetime.now().strftime('%Y.%m.%d-%H.%M.%S'))}", project=model_args.wandb_project, entity=model_args.wandb_entity)
         train_result = trainer.train(resume_from_checkpoint=training_args.resume_from_checkpoint)
         trainer.save_model()
         trainer.log_metrics("train", train_result.metrics)
         trainer.save_metrics("train", train_result.metrics)
         trainer.save_state()
+
+
         if trainer.is_world_process_zero() and finetuning_args.plot_loss:
             plot_loss(training_args.output_dir, keys=["loss", "eval_loss"])
 

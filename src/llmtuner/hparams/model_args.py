@@ -7,11 +7,22 @@ class ModelArguments:
     r"""
     Arguments pertaining to which model/config/tokenizer we are going to fine-tune or infer.
     """
-
     model_name_or_path: str = field(
         metadata={
             "help": "Path to the model weight or identifier from huggingface.co/models or modelscope.cn/models."
         },
+    )
+    wandb_project: str = field(
+        default=None,
+        metadata={
+            "help": "the project name of wandb, for example llama pro."
+        }
+    )
+    wandb_entity: str = field(
+        default=None,
+        metadata={
+            "help": "the entity name of wandb, for example pradalab."
+        }
     )
     adapter_name_or_path: Optional[str] = field(
         default=None,

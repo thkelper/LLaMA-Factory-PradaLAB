@@ -5,13 +5,13 @@ services:
     build:
       dockerfile: Dockerfile
       context: .
-    container_name: llama_factory
+    container_name: llama_factory_latest
     volumes:
-      - ./hf_cache:/root/.cache/huggingface/
+      - ./hf_cache:/root/.cache/huggingace/
       - ./data:/app/data
       - ./output:/app/output
     environment:
-      - CUDA_VISIBLE_DEVICES=0
+      - CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
     ports:
       - "7860:7860"
     ipc: host

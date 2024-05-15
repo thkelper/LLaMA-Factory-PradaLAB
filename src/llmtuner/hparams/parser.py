@@ -36,7 +36,7 @@ _EVAL_CLS = Tuple[ModelArguments, DataArguments, EvaluationArguments, Finetuning
 def _parse_args(parser: "HfArgumentParser", args: Optional[Dict[str, Any]] = None) -> Tuple[Any]:
     if args is not None:
         return parser.parse_dict(args)
-
+    
     if len(sys.argv) == 2 and sys.argv[1].endswith(".yaml"):
         return parser.parse_yaml_file(os.path.abspath(sys.argv[1]))
 
@@ -122,6 +122,7 @@ def _parse_eval_args(args: Optional[Dict[str, Any]] = None) -> _EVAL_CLS:
 
 
 def get_train_args(args: Optional[Dict[str, Any]] = None) -> _TRAIN_CLS:
+
     model_args, data_args, training_args, finetuning_args, generating_args = _parse_train_args(args)
 
     # Setup logging
@@ -295,7 +296,10 @@ def get_train_args(args: Optional[Dict[str, Any]] = None) -> _TRAIN_CLS:
     )
 
     transformers.set_seed(training_args.seed)
-
+    print(f"ycp_test666:\n{training_args}")
+    # import pdb
+    # pdb.set_trace()
+    
     return model_args, data_args, training_args, finetuning_args, generating_args
 
 

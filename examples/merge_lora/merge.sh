@@ -10,3 +10,5 @@ CUDA_VISIBLE_DEVICES=0 python ../../src/export_model.py \
     --export_size 2 \
     --export_device cpu \
     --export_legacy_format False
+
+

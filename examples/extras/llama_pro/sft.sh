@@ -1,21 +1,20 @@
 #!/bin/bash
 
-CUDA_VISIBLE_DEVICES=0 python ../../../src/train_bash.py \
+CUDA_VISIBLE_DEVICES=0 python src/train_bash.py \
     --stage sft \
     --do_train \
-    --model_name_or_path ../../../models/llama2-7b-pro \
-    --dataset alpaca_gpt4_en,glaive_toolcall \
-    --dataset_dir ../../../data \
+    --model_name_or_path /root/autodl-tmp/data/models/llama-8b-instruct-pro \
+    --dataset commonsense_170k \
     --template default \
     --finetuning_type freeze \
     --name_module_trainable all \
-    --num_layer_trainable 8 \
+    --num_layer_trainable 2 \
     --use_llama_pro \
-    --output_dir ../../../saves/LLaMA2-7B-Pro/lora/sft \
+    --output_dir /root/autodl-tmp/data/models/llama3-8B-instruct/llamapro_commonsense_set1 \
     --overwrite_cache \
     --overwrite_output_dir \
     --cutoff_len 1024 \
-    --preprocessing_num_workers 16 \
+    --preprocessing_num_workers 8 \
     --per_device_train_batch_size 1 \
     --per_device_eval_batch_size 1 \
     --gradient_accumulation_steps 8 \
@@ -32,3 +31,4 @@ CUDA_VISIBLE_DEVICES=0 python ../../../src/train_bash.py \
     --val_size 0.1 \
     --plot_loss \
     --fp16
+    # --dataset_dir ../../../data \

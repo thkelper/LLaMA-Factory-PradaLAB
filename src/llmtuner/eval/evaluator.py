@@ -32,7 +32,7 @@ class Evaluator:
         self.choice_inputs = [
             self.tokenizer.encode(self.eval_template.prefix + ch, add_special_tokens=False)[-1] for ch in CHOICES
         ]
-
+    
     @torch.inference_mode()
     def batch_inference(self, batch_input: Dict[str, torch.Tensor]) -> List[str]:
         logits = self.model(**batch_input).logits
@@ -48,7 +48,7 @@ class Evaluator:
             cache_dir=self.model_args.cache_dir,
             token=self.model_args.hf_hub_token,
         )
-
+        
         with open(mapping, "r", encoding="utf-8") as f:
             categorys: Dict[str, Dict[str, str]] = json.load(f)
 
