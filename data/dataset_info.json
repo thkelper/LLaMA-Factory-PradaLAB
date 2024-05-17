@@ -1,4 +1,24 @@
 {
+  "dianli_finetune_data_1224": {
+    "file_name": "dianli_finetune_data_1224.json",
+    "file_sha1": "c18e0b19c5c16c6df336606988e3a5ad22d65202",
+    "columns": {
+      "prompt": "instruction",
+      "query": "input",
+      "response": "output",
+      "history": "history"
+    },
+    "ranking": true
+  },
+  "dianli_finetune_data_merge_1224_0425": {
+    "file_name": "dianli_finetune_data_merge_1224_0425.json",
+    "file_sha1": "c69e7f4710453dcf3a97fc2a9848b410c925e141",
+    "columns": {
+      "prompt": "instruction",
+      "query": "input",
+      "response": "output"
+    }
+  },
   "commonsense_170k": {
     "file_name": "/root/autodl-tmp/datasets/commonsense_170k/train.json",
     "columns": {
