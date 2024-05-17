@@ -1,3 +1,10 @@
+# Self ingore
+train_exps/
+export_dir/
+eval_results/
+before0512_train_record
+wandb/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

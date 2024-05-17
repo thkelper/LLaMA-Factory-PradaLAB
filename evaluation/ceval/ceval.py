@@ -89,6 +89,9 @@ task_list = [
     "environmental_impact_assessment_engineer",
     "tax_accountant",
     "physician",
+    "dianli_routing_inspection_v1",
+    "dianli_routing_inspection_v2",
+    "dianli_routing_inspection_v1andv2"
 ]
 
 
